@@ -17,6 +17,10 @@ import javax.swing.table.DefaultTableModel;
 
 import com.alura.jdbc.controller.CategoriaController;
 import com.alura.jdbc.controller.ProductoController;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ControlDeStockFrame extends JFrame {
 
@@ -47,6 +51,11 @@ public class ControlDeStockFrame extends JFrame {
         configurarAccionesDelFormulario();
     }
 
+    /**
+     * Metodo que permite visualizar todo el contenido de lo almacenado en la DB
+     *
+     * @param container
+     */
     private void configurarTablaDeContenido(Container container) {
         tabla = new JTable();
 
@@ -54,6 +63,7 @@ public class ControlDeStockFrame extends JFrame {
         modelo.addColumn("Identificador del Producto");
         modelo.addColumn("Nombre del Producto");
         modelo.addColumn("Descripción del Producto");
+        modelo.addColumn("Cantidad");
 
         cargarTabla();
 
@@ -63,8 +73,8 @@ public class ControlDeStockFrame extends JFrame {
         botonModificar = new JButton("Modificar");
         botonReporte = new JButton("Ver Reporte");
         botonEliminar.setBounds(10, 500, 80, 20);
-        botonModificar.setBounds(100, 500, 80, 20);
-        botonReporte.setBounds(190, 500, 80, 20);
+        botonModificar.setBounds(110, 500, 90, 20);
+        botonReporte.setBounds(220, 500, 110, 20);
 
         container.add(tabla);
         container.add(botonEliminar);
@@ -76,6 +86,10 @@ public class ControlDeStockFrame extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    /**
+     * metodo que permite la visualización de los campos del formulario y sus botones
+     * @param container 
+     */
     private void configurarCamposDelFormulario(Container container) {
         labelNombre = new JLabel("Nombre del Producto");
         labelDescripcion = new JLabel("Descripción del Producto");
@@ -109,7 +123,7 @@ public class ControlDeStockFrame extends JFrame {
         botonGuardar = new JButton("Guardar");
         botonLimpiar = new JButton("Limpiar");
         botonGuardar.setBounds(10, 175, 80, 20);
-        botonLimpiar.setBounds(100, 175, 80, 20);
+        botonLimpiar.setBounds(110, 175, 80, 20);
 
         container.add(labelNombre);
         container.add(labelDescripcion);
@@ -208,15 +222,25 @@ public class ControlDeStockFrame extends JFrame {
     }
 
     private void cargarTabla() {
-        var productos = this.productoController.listar();
+        List<Map<String, String>> productos = new ArrayList<Map<String, String>>(); //Lista que almacenará lo almacenado en la DB
 
         try {
-            // TODO
-            // productos.forEach(producto -> modelo.addRow(new Object[] { "id", "nombre",
-            // "descripcion" }));
-        } catch (Exception e) {
-            throw e;
+            productos = this.productoController.listar();
+            try {
+                productos.forEach(producto -> modelo.addRow(//recorremos la lista obteniendo cada campo
+                        new Object[]{
+                            producto.get("IDPRODUCTO"),
+                            producto.get("NOMBRE"),
+                            producto.get("DESCRIPCION"),
+                            producto.get("CANTIDAD")}));
+            } catch (Exception e) {
+                throw e;
+            }
+        } catch (SQLException e) {//manejamos el problema de conexión que surja
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
+
     }
 
     private void guardar() {
@@ -236,7 +260,7 @@ public class ControlDeStockFrame extends JFrame {
         }
 
         // TODO
-        var producto = new Object[] { textoNombre.getText(), textoDescripcion.getText(), cantidadInt };
+        var producto = new Object[]{textoNombre.getText(), textoDescripcion.getText(), cantidadInt};
         var categoria = comboCategoria.getSelectedItem();
 
         this.productoController.guardar(producto);
