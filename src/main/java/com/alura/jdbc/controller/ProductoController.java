@@ -46,8 +46,24 @@ public class ProductoController {
         return resultado;
     }
 
-    public void guardar(Object producto) {
-        // TODO
+    public void guardar(Map<String, String> producto) throws SQLException {
+        ConnectionFactory factory = new ConnectionFactory();
+        Connection con = factory.recuperaConexion();
+
+        Statement statement = con.createStatement();
+        statement.execute(//para poder ejecutar comandos de sql creamos un Statement
+                "INSERT INTO PRODUCTO (nombre, descripcion, cantidad)" //valores que queremos agregar
+                        + " VALUES ('" + producto.get("NOMBRE") + "', '"
+                        + producto.get("DESCRIPCION") + "', '" + producto.get("CANTIDAD") + "')",
+                        Statement.RETURN_GENERATED_KEYS); //podemos tomar el id generado al insertar en la lista de la DB
+        
+        ResultSet resultSet = statement.getGeneratedKeys();//obtenemos todas las keys (id) generadas
+        
+        while(resultSet.next()) {//recorremos la lista de id
+            System.out.println(String.format(
+                    "Fue insertado el producto de ID: %d",
+                    resultSet.getInt(1)));
+        }
     }
 
 }

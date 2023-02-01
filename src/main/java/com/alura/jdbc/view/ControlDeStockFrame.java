@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Optional;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -17,8 +16,12 @@ import javax.swing.table.DefaultTableModel;
 
 import com.alura.jdbc.controller.CategoriaController;
 import com.alura.jdbc.controller.ProductoController;
+
 import java.sql.SQLException;
+
+import java.util.Optional;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -137,9 +140,13 @@ public class ControlDeStockFrame extends JFrame {
         container.add(botonLimpiar);
     }
 
+    /**
+     * Al precionar el boton guardar llamamos a los metodos ...
+     */
     private void configurarAccionesDelFormulario() {
         botonGuardar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                //lista de metodos a llamar
                 guardar();
                 limpiarTabla();
                 cargarTabla();
@@ -243,8 +250,13 @@ public class ControlDeStockFrame extends JFrame {
 
     }
 
+    /**
+     * metodo que permite guardar el nombre, descripción y cantidad en la base de datos
+     * segun la información obteniada de los campos del formulario.
+     * ademas corrobora que no se incerten datos erroneos o campos bacíos
+     */
     private void guardar() {
-        if (textoNombre.getText().isBlank() || textoDescripcion.getText().isBlank()) {
+        if (textoNombre.getText().isBlank() || textoDescripcion.getText().isBlank()) { //corrobora que ambos campos no estén vacíos
             JOptionPane.showMessageDialog(this, "Los campos Nombre y Descripción son requeridos.");
             return;
         }
@@ -255,15 +267,22 @@ public class ControlDeStockFrame extends JFrame {
             cantidadInt = Integer.parseInt(textoCantidad.getText());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, String
-                    .format("El campo cantidad debe ser numérico dentro del rango %d y %d.", 0, Integer.MAX_VALUE));
+                    .format("El campo cantidad debe ser numérico dentro del rango %d y %d.", 0, Integer.MAX_VALUE)); //corrobora que no se incerten Strings
             return;
         }
 
-        // TODO
-        var producto = new Object[]{textoNombre.getText(), textoDescripcion.getText(), cantidadInt};
+        var producto = new HashMap<String, String>();//almacena la información en un hashmap
+        producto.put("NOMBRE", textoNombre.getText());
+        producto.put("DESCRIPCION", textoDescripcion.getText());
+        producto.put("CANTIDAD", String.valueOf(cantidadInt));
         var categoria = comboCategoria.getSelectedItem();
 
-        this.productoController.guardar(producto);
+        try {
+            this.productoController.guardar(producto);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);//encapsulamos la excepcion
+        }
 
         JOptionPane.showMessageDialog(this, "Registrado con éxito!");
 
