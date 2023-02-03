@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ControlDeStockFrame extends JFrame {
 
@@ -196,6 +198,11 @@ public class ControlDeStockFrame extends JFrame {
         return tabla.getSelectedRowCount() == 0 || tabla.getSelectedColumnCount() == 0;
     }
 
+    /**
+     * Mediante este metodo logramos seleccionar cada campo de la lista
+     * modificar los datos, enviar esa información a la base de datos y
+     * actualizarla
+     */
     private void modificar() {
         if (tieneFilaElegida()) {
             JOptionPane.showMessageDialog(this, "Por favor, elije un item");
@@ -204,25 +211,34 @@ public class ControlDeStockFrame extends JFrame {
 
         Optional.ofNullable(modelo.getValueAt(tabla.getSelectedRow(), tabla.getSelectedColumn()))
                 .ifPresentOrElse(fila -> {
-                    Integer id = (Integer) modelo.getValueAt(tabla.getSelectedRow(), 0);
+                    Integer id = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 0).toString()); //modificamos para que el in se conviierta en String
                     String nombre = (String) modelo.getValueAt(tabla.getSelectedRow(), 1);
                     String descripcion = (String) modelo.getValueAt(tabla.getSelectedRow(), 2);
+                    Integer cantidad = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 3).toString()); //agregamos el que obtiene la información de la cantidad
 
-                    this.productoController.modificar(nombre, descripcion, id);
+                    int filasModificadas;
+
+                    try {
+                        filasModificadas = this.productoController.modificar(nombre, descripcion, cantidad, id);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+
+                    JOptionPane.showMessageDialog(this, String.format("%d item modificado con éxito!", filasModificadas));
                 }, () -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
     }
 
-    
     /**
      * metodo que permite eliminar los datos de la lista
      */
     private void eliminar() {
-        if (tieneFilaElegida()) {
+        if (tieneFilaElegida()) {//revisamos que una fila esté seleccionada para ser modificada
             JOptionPane.showMessageDialog(this, "Por favor, elije un item");
             return;
         }
 
-         Optional.ofNullable(modelo.getValueAt(tabla.getSelectedRow(), tabla.getSelectedColumn()))
+        Optional.ofNullable(modelo.getValueAt(tabla.getSelectedRow(), tabla.getSelectedColumn()))
                 .ifPresentOrElse(fila -> {
                     Integer id = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 0).toString());
                     int filasModificadas;
@@ -240,6 +256,10 @@ public class ControlDeStockFrame extends JFrame {
                 }, () -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
     }
 
+    /**
+     * Metodo que permite mostrar la tabla, con los datos obtenidos de la DB
+     * dentro del panel de visualización
+     */
     private void cargarTabla() {
         List<Map<String, String>> productos = new ArrayList<Map<String, String>>(); //Lista que almacenará lo almacenado en la DB
 
