@@ -90,8 +90,10 @@ public class ControlDeStockFrame extends JFrame {
     }
 
     /**
-     * metodo que permite la visualización de los campos del formulario y sus botones
-     * @param container 
+     * metodo que permite la visualización de los campos del formulario y sus
+     * botones
+     *
+     * @param container
      */
     private void configurarCamposDelFormulario(Container container) {
         labelNombre = new JLabel("Nombre del Producto");
@@ -210,21 +212,31 @@ public class ControlDeStockFrame extends JFrame {
                 }, () -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
     }
 
+    
+    /**
+     * metodo que permite eliminar los datos de la lista
+     */
     private void eliminar() {
         if (tieneFilaElegida()) {
             JOptionPane.showMessageDialog(this, "Por favor, elije un item");
             return;
         }
 
-        Optional.ofNullable(modelo.getValueAt(tabla.getSelectedRow(), tabla.getSelectedColumn()))
+         Optional.ofNullable(modelo.getValueAt(tabla.getSelectedRow(), tabla.getSelectedColumn()))
                 .ifPresentOrElse(fila -> {
-                    Integer id = (Integer) modelo.getValueAt(tabla.getSelectedRow(), 0);
+                    Integer id = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 0).toString());
+                    int filasModificadas;
 
-                    this.productoController.eliminar(id);
+                    try {
+                        filasModificadas = this.productoController.eliminar(id);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
 
                     modelo.removeRow(tabla.getSelectedRow());
 
-                    JOptionPane.showMessageDialog(this, "Item eliminado con éxito!");
+                    JOptionPane.showMessageDialog(this, String.format("%d item eliminado con éxito!", filasModificadas));
                 }, () -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
     }
 
@@ -251,8 +263,8 @@ public class ControlDeStockFrame extends JFrame {
     }
 
     /**
-     * metodo que permite guardar el nombre, descripción y cantidad en la base de datos
-     * segun la información obteniada de los campos del formulario.
+     * metodo que permite guardar el nombre, descripción y cantidad en la base
+     * de datos segun la información obteniada de los campos del formulario.
      * ademas corrobora que no se incerten datos erroneos o campos bacíos
      */
     private void guardar() {

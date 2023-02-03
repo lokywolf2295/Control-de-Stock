@@ -16,10 +16,32 @@ public class ProductoController {
         // TODO
     }
 
-    public void eliminar(Integer id) {
-        // TODO
+    /**
+     * Metodo que permite eliminar los datos de la base de datos
+     * @param id
+     * @return
+     * @throws SQLException 
+     */
+    public int eliminar(Integer id) throws SQLException {
+        ConnectionFactory factory = new ConnectionFactory();
+        Connection con = factory.recuperaConexion();
+
+        Statement statement = con.createStatement();
+        
+        statement.execute("DELETE FROM PRODUCTO WHERE ID = " + id);
+        
+        int updateCount = statement.getUpdateCount();
+        
+        con.close();
+        
+        return updateCount;
     }
 
+    /**
+     * Metodo que permite mostrar la informacion de la base de datos.
+     * @return
+     * @throws SQLException 
+     */
     public List<Map<String, String>> listar() throws SQLException {
         ConnectionFactory factory = new ConnectionFactory();
         Connection con = factory.recuperaConexion();
@@ -46,6 +68,11 @@ public class ProductoController {
         return resultado;
     }
 
+    /**
+     * Metodo que permite guardar la informacion en la base de datos.
+     * @param producto
+     * @throws SQLException 
+     */
     public void guardar(Map<String, String> producto) throws SQLException {
         ConnectionFactory factory = new ConnectionFactory();
         Connection con = factory.recuperaConexion();
