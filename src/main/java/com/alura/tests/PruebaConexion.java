@@ -1,8 +1,8 @@
 
 package com.alura.tests;
 
+import com.alura.factory.ConnectionFactory;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class PruebaConexion {
@@ -10,10 +10,8 @@ public class PruebaConexion {
     public static void main(String[] args) throws SQLException {
         
         /*Creamos la conexion mediante el DriverConection*/
-        Connection con = DriverManager.getConnection(/*Abrimos la Conexion*/
-                "jdbc:mysql://localhost/control_de_stock?useTimeZone=true&serverTimeZone=UTC",
-                "root",
-                "");
+        ConnectionFactory factory = new ConnectionFactory();
+        Connection con = factory.recuperaConexion();
 
         System.out.println("Cerrando la conexión");
 
