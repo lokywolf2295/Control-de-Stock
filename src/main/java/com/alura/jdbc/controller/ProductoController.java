@@ -1,10 +1,8 @@
 package com.alura.jdbc.controller;
 
 import com.alura.factory.ConnectionFactory;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,13 +26,17 @@ public class ProductoController {
         ConnectionFactory factory = new ConnectionFactory();
         Connection con = factory.recuperaConexion();
 
-        Statement statement = con.createStatement();
-//actualizamos todos los datos de la tabla
-        statement.execute("UPDATE PRODUCTO SET "
-                + " NOMBRE = '" + nombre + "'"
-                + ", DESCRIPCION = '" + descripcion + "'"
-                + ", CANTIDAD = " + cantidad
-                + " WHERE IDPRODUCTO = " + id);
+        PreparedStatement statement = con.prepareStatement("UPDATE PRODUCTO SET "
+                + " NOMBRE = ?"
+                + ", DESCRIPCION = ?"
+                + ", CANTIDAD = ?"
+                + " WHERE IDPRODUCTO = ?");//actualizamos todos los datos de la tabla
+        statement.setString(1,nombre);
+        statement.setString(2,descripcion);
+        statement.setInt(3,cantidad);
+        statement.setInt(4,id);
+
+        statement.execute();
 
         int updateCount = statement.getUpdateCount(); //metodo que retorna el estado de actualización del statement
 
@@ -54,9 +56,10 @@ public class ProductoController {
         ConnectionFactory factory = new ConnectionFactory();
         Connection con = factory.recuperaConexion();
 
-        Statement statement = con.createStatement();
+        PreparedStatement statement = con.prepareStatement("DELETE FROM PRODUCTO WHERE IDPRODUCTO = ?");//script para eliminar un dato por su id
+        statement.setInt(1,id);
 
-        statement.execute("DELETE FROM PRODUCTO WHERE IDPRODUCTO = " + id); //script para eliminar un dato por su id
+        statement.execute();
 
         int updateCount = statement.getUpdateCount();//metodo que retorna el estado de actualización del statement
 
@@ -75,8 +78,8 @@ public class ProductoController {
         ConnectionFactory factory = new ConnectionFactory();
         Connection con = factory.recuperaConexion();
 
-        Statement statement = con.createStatement(); //para poder ejecutar comandos de sql creamos un Statement
-        statement.execute("SELECT IDPRODUCTO, NOMBRE, DESCRIPCION, CANTIDAD FROM PRODUCTO"); //enviamos las columnas que deseamos visualizar
+        PreparedStatement statement = con.prepareStatement("SELECT IDPRODUCTO, NOMBRE, DESCRIPCION, CANTIDAD FROM PRODUCTO"); //para poder ejecutar comandos de sql  y evitar el ingreso de SQL Injection creamos un PreparedStatement
+        statement.execute(); //enviamos las columnas que deseamos visualizar
 
         ResultSet resultSet = statement.getResultSet(); //obtenemos la información que proviene de la Base de datos
 
@@ -107,12 +110,20 @@ public class ProductoController {
         ConnectionFactory factory = new ConnectionFactory();
         Connection con = factory.recuperaConexion();
 
-        Statement statement = con.createStatement();
-        statement.execute(//para poder ejecutar comandos de sql creamos un Statement
-                "INSERT INTO PRODUCTO (nombre, descripcion, cantidad)" //valores que queremos agregar
-                + " VALUES ('" + producto.get("NOMBRE") + "', '"
-                + producto.get("DESCRIPCION") + "', '" + producto.get("CANTIDAD") + "')",
-                Statement.RETURN_GENERATED_KEYS); //podemos tomar el id generado al insertar en la lista de la DB
+        /*ATENCIÓN IMPORTANTE
+            usamos el PreparedStatement para:
+            Revisar la información ingresada por los inputs
+            evitar que en esa información se encuentren secuencias de SQL
+            por lo tanto evitamos SQL INJECTION
+         */
+        PreparedStatement statement = con.prepareStatement("INSERT INTO PRODUCTO (nombre, descripcion, cantidad)" //valores que queremos agregar
+                        + " VALUES (?,?,?)",
+        Statement.RETURN_GENERATED_KEYS);//podemos tomar el id generado al insertar en la lista de la DB
+        statement.setString(1,producto.get("NOMBRE"));
+        statement.setString(2,producto.get("DESCRIPCION"));
+        statement.setInt(3,Integer.valueOf(producto.get("CANTIDAD")));
+
+        statement.execute(); //ejecutamos el execute
 
         ResultSet resultSet = statement.getGeneratedKeys();//obtenemos todas las keys (id) generadas
 
