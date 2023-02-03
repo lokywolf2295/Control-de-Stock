@@ -12,35 +12,64 @@ import java.util.Map;
 
 public class ProductoController {
 
-    public void modificar(String nombre, String descripcion, Integer id) {
-        // TODO
+    /**
+     * Metodo que permite actualizar los datos de la DB con los modificados en
+     * la tabla.
+     *
+     * @param nombre
+     * @param descripcion
+     * @param cantidad
+     * @param id
+     * @return updateCount
+     * @throws SQLException
+     */
+    public int modificar(String nombre, String descripcion, Integer cantidad, Integer id) throws SQLException {
+        //todos los metodos nececitan tener el throws por la coneccion, o en su defecto un try catch
+        ConnectionFactory factory = new ConnectionFactory();
+        Connection con = factory.recuperaConexion();
+
+        Statement statement = con.createStatement();
+//actualizamos todos los datos de la tabla
+        statement.execute("UPDATE PRODUCTO SET "
+                + " NOMBRE = '" + nombre + "'"
+                + ", DESCRIPCION = '" + descripcion + "'"
+                + ", CANTIDAD = " + cantidad
+                + " WHERE IDPRODUCTO = " + id);
+
+        int updateCount = statement.getUpdateCount(); //metodo que retorna el estado de actualización del statement
+
+        con.close();
+
+        return updateCount;
     }
 
     /**
      * Metodo que permite eliminar los datos de la base de datos
+     *
      * @param id
-     * @return
-     * @throws SQLException 
+     * @return updateCount
+     * @throws SQLException
      */
     public int eliminar(Integer id) throws SQLException {
         ConnectionFactory factory = new ConnectionFactory();
         Connection con = factory.recuperaConexion();
 
         Statement statement = con.createStatement();
-        
-        statement.execute("DELETE FROM PRODUCTO WHERE ID = " + id);
-        
-        int updateCount = statement.getUpdateCount();
-        
+
+        statement.execute("DELETE FROM PRODUCTO WHERE IDPRODUCTO = " + id); //script para eliminar un dato por su id
+
+        int updateCount = statement.getUpdateCount();//metodo que retorna el estado de actualización del statement
+
         con.close();
-        
+
         return updateCount;
     }
 
     /**
      * Metodo que permite mostrar la informacion de la base de datos.
+     *
      * @return
-     * @throws SQLException 
+     * @throws SQLException
      */
     public List<Map<String, String>> listar() throws SQLException {
         ConnectionFactory factory = new ConnectionFactory();
@@ -70,8 +99,9 @@ public class ProductoController {
 
     /**
      * Metodo que permite guardar la informacion en la base de datos.
+     *
      * @param producto
-     * @throws SQLException 
+     * @throws SQLException
      */
     public void guardar(Map<String, String> producto) throws SQLException {
         ConnectionFactory factory = new ConnectionFactory();
@@ -80,13 +110,13 @@ public class ProductoController {
         Statement statement = con.createStatement();
         statement.execute(//para poder ejecutar comandos de sql creamos un Statement
                 "INSERT INTO PRODUCTO (nombre, descripcion, cantidad)" //valores que queremos agregar
-                        + " VALUES ('" + producto.get("NOMBRE") + "', '"
-                        + producto.get("DESCRIPCION") + "', '" + producto.get("CANTIDAD") + "')",
-                        Statement.RETURN_GENERATED_KEYS); //podemos tomar el id generado al insertar en la lista de la DB
-        
+                + " VALUES ('" + producto.get("NOMBRE") + "', '"
+                + producto.get("DESCRIPCION") + "', '" + producto.get("CANTIDAD") + "')",
+                Statement.RETURN_GENERATED_KEYS); //podemos tomar el id generado al insertar en la lista de la DB
+
         ResultSet resultSet = statement.getGeneratedKeys();//obtenemos todas las keys (id) generadas
-        
-        while(resultSet.next()) {//recorremos la lista de id
+
+        while (resultSet.next()) {//recorremos la lista de id
             System.out.println(String.format(
                     "Fue insertado el producto de ID: %d",
                     resultSet.getInt(1)));
