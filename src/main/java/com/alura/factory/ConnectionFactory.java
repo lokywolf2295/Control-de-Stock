@@ -24,6 +24,7 @@ public class ConnectionFactory {
         pooleadDataSource.setJdbcUrl("jdbc:mysql://localhost/control_de_stock?useTimeZone=true&serverTimeZone=UTC");
         pooleadDataSource.setUser("root");
         pooleadDataSource.setPassword("");
+        pooleadDataSource.setMaxPoolSize(10); //cambiamos la cantidad de conexiones multiples a 10 como maximo
 
         this.dataSource = pooleadDataSource;
     }
