@@ -16,12 +16,12 @@ import javax.swing.table.DefaultTableModel;
 
 import com.alura.jdbc.controller.CategoriaController;
 import com.alura.jdbc.controller.ProductoController;
+import com.alura.jdbc.modelo.Producto;
 
 import java.sql.SQLException;
 
 import java.util.Optional;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -301,10 +301,10 @@ public class ControlDeStockFrame extends JFrame {
             return;
         }
 
-        var producto = new HashMap<String, String>();//almacena la información en un hashmap
-        producto.put("NOMBRE", textoNombre.getText());
-        producto.put("DESCRIPCION", textoDescripcion.getText());
-        producto.put("CANTIDAD", String.valueOf(cantidadInt));
+        var producto = new Producto(textoNombre.getText(),
+                textoDescripcion.getText(),
+                cantidadInt);//almacena la información en un hashmap
+
         var categoria = comboCategoria.getSelectedItem();
 
         try {

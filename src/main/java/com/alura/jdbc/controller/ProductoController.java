@@ -1,6 +1,7 @@
 package com.alura.jdbc.controller;
 
 import com.alura.factory.ConnectionFactory;
+import com.alura.jdbc.modelo.Producto;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -27,11 +28,7 @@ public class ProductoController {
         final Connection con = factory.recuperaConexion();
 
         try (con) { //cerramos automaticamente la conexion cuando finalice la operación
-            final PreparedStatement statement = con.prepareStatement("UPDATE PRODUCTO SET "
-                    + " NOMBRE = ?"
-                    + ", DESCRIPCION = ?"
-                    + ", CANTIDAD = ?"
-                    + " WHERE IDPRODUCTO = ?");//actualizamos todos los datos de la tabla
+            final PreparedStatement statement = con.prepareStatement("UPDATE PRODUCTO SET " + " NOMBRE = ?" + ", DESCRIPCION = ?" + ", CANTIDAD = ?" + " WHERE IDPRODUCTO = ?");//actualizamos todos los datos de la tabla
 
             try (statement) { //cerramos el statement cuando finalice la instrucción.
                 statement.setString(1, nombre);
@@ -113,11 +110,7 @@ public class ProductoController {
      *
      * @throws SQLException para evitar errores
      */
-    public void guardar(Map<String, String> producto) throws SQLException {
-        String nombre = producto.get("NOMBRE");
-        String descripcion = producto.get("DESCRIPCION");
-        Integer cantidad = Integer.valueOf(producto.get("CANTIDAD"));
-        Integer maximoCantidad = 50;
+    public void guardar(Producto producto) throws SQLException {
 
         ConnectionFactory factory = new ConnectionFactory();
         final Connection con = factory.recuperaConexion();
@@ -131,19 +124,11 @@ public class ProductoController {
             evitar que en esa información se encuentren secuencias de SQL
             por lo tanto evitamos SQL INJECTION
          */
-            final PreparedStatement statement = con.prepareStatement(
-                    "INSERT INTO PRODUCTO (nombre, descripcion, cantidad)" //valores que queremos agregar
-                            + " VALUES (?,?,?)",
-                    Statement.RETURN_GENERATED_KEYS);//podemos tomar el id generado al insertar en la lista de la DB
+            final PreparedStatement statement = con.prepareStatement("INSERT INTO PRODUCTO (nombre, descripcion, cantidad)" //valores que queremos agregar
+                    + " VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);//podemos tomar el id generado al insertar en la lista de la DB
 
             try (statement) {//para tener un mejor control de la transacción cerramos el statement de manera automática
-                do {
-                    int cantidadParaGuardar = Math.min(cantidad, maximoCantidad); //controlamos que la cantidad sea menor al maximo
-
-                    ejecutaRegistro(nombre, descripcion, cantidadParaGuardar, statement); //mientras sea menor se registra con normalidad sinó se divide en otra ejecución.
-
-                    cantidad -= maximoCantidad;
-                } while (cantidad > 0);
+                ejecutaRegistro(producto, statement); //mientras sea menor se registra con normalidad sinó se divide en otra ejecución.
 
                 con.commit(); //de esta manera nosotros decidimos cuando insertaremos la información
             }
@@ -156,17 +141,14 @@ public class ProductoController {
     /**
      * metodo que ejecutala instrucción SQL
      *
-     * @param nombre      del producto
-     * @param descripcion del producto
-     * @param cantidad    de stock
-     * @param statement   prepara la ejecución de la query
+     * @param producto  contiene el modelo de nombre, descripción y cantidad
+     * @param statement prepara la ejecución de la query
      * @throws SQLException para evitar errores
      */
-    private void ejecutaRegistro(String nombre, String descripcion, Integer cantidad, PreparedStatement statement)
-            throws SQLException {
-        statement.setString(1, nombre);
-        statement.setString(2, descripcion);
-        statement.setInt(3, cantidad);
+    private void ejecutaRegistro(Producto producto, PreparedStatement statement) throws SQLException {
+        statement.setString(1, producto.getNombre());
+        statement.setString(2, producto.getDescripcion());
+        statement.setInt(3, producto.getCantidad());
 
         /*if (cantidad < 50) { //probando un error para luego manejarlo
             throw new RuntimeException("Ocurrió un error");
@@ -178,8 +160,8 @@ public class ProductoController {
 
         try (resultSet) { //con el final y el try ejecutamos el autoclousable de la clase resulset que cierra las conexiones de manera automática
             while (resultSet.next()) {
-                System.out.println(String.format("Fue insertado el producto de ID: %d",
-                        resultSet.getInt(1)));
+                producto.setId(resultSet.getInt(1));
+                System.out.println(String.format("Fue insertado el producto %s", producto));
             }
         }
     }
