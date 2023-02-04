@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ControlDeStockFrame extends JFrame {
 
@@ -59,7 +57,7 @@ public class ControlDeStockFrame extends JFrame {
     /**
      * Metodo que permite visualizar todo el contenido de lo almacenado en la DB
      *
-     * @param container
+     * @param container recibe el contenedor como parametro
      */
     private void configurarTablaDeContenido(Container container) {
         tabla = new JTable();
@@ -95,7 +93,7 @@ public class ControlDeStockFrame extends JFrame {
      * metodo que permite la visualización de los campos del formulario y sus
      * botones
      *
-     * @param container
+     * @param container recibe el contenedor como parametro
      */
     private void configurarCamposDelFormulario(Container container) {
         labelNombre = new JLabel("Nombre del Producto");
@@ -268,10 +266,10 @@ public class ControlDeStockFrame extends JFrame {
             try {
                 productos.forEach(producto -> modelo.addRow(//recorremos la lista obteniendo cada campo
                         new Object[]{
-                            producto.get("IDPRODUCTO"),
-                            producto.get("NOMBRE"),
-                            producto.get("DESCRIPCION"),
-                            producto.get("CANTIDAD")}));
+                                producto.get("IDPRODUCTO"),
+                                producto.get("NOMBRE"),
+                                producto.get("DESCRIPCION"),
+                                producto.get("CANTIDAD")}));
             } catch (Exception e) {
                 throw e;
             }
