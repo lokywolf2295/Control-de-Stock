@@ -16,14 +16,11 @@ import javax.swing.table.DefaultTableModel;
 
 import com.alura.jdbc.controller.CategoriaController;
 import com.alura.jdbc.controller.ProductoController;
+import com.alura.jdbc.modelo.Producto;
 
 import java.sql.SQLException;
 
 import java.util.Optional;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ControlDeStockFrame extends JFrame {
 
@@ -214,14 +211,7 @@ public class ControlDeStockFrame extends JFrame {
                     String descripcion = (String) modelo.getValueAt(tabla.getSelectedRow(), 2);
                     Integer cantidad = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 3).toString()); //agregamos el que obtiene la información de la cantidad
 
-                    int filasModificadas;
-
-                    try {
-                        filasModificadas = this.productoController.modificar(nombre, descripcion, cantidad, id);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
-                    }
+                    var filasModificadas = this.productoController.modificar(nombre, descripcion, cantidad, id);
 
                     JOptionPane.showMessageDialog(this, String.format("%d item modificado con éxito!", filasModificadas));
                 }, () -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
@@ -239,14 +229,7 @@ public class ControlDeStockFrame extends JFrame {
         Optional.ofNullable(modelo.getValueAt(tabla.getSelectedRow(), tabla.getSelectedColumn()))
                 .ifPresentOrElse(fila -> {
                     Integer id = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 0).toString());
-                    int filasModificadas;
-
-                    try {
-                        filasModificadas = this.productoController.eliminar(id);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
-                    }
+                    var filasModificadas = this.productoController.eliminar(id);
 
                     modelo.removeRow(tabla.getSelectedRow());
 
@@ -259,25 +242,14 @@ public class ControlDeStockFrame extends JFrame {
      * dentro del panel de visualización
      */
     private void cargarTabla() {
-        List<Map<String, String>> productos = new ArrayList<Map<String, String>>(); //Lista que almacenará lo almacenado en la DB
+        var productos = this.productoController.listar();
 
-        try {
-            productos = this.productoController.listar();
-            try {
-                productos.forEach(producto -> modelo.addRow(//recorremos la lista obteniendo cada campo
-                        new Object[]{
-                                producto.get("IDPRODUCTO"),
-                                producto.get("NOMBRE"),
-                                producto.get("DESCRIPCION"),
-                                producto.get("CANTIDAD")}));
-            } catch (Exception e) {
-                throw e;
-            }
-        } catch (SQLException e) {//manejamos el problema de conexión que surja
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-
+        productos.forEach(producto -> modelo.addRow(//recorremos la lista obteniendo cada campo
+                new Object[]{
+                        producto.getId(),
+                        producto.getNombre(),
+                        producto.getDescripcion(),
+                        producto.getCantidad()}));
     }
 
     /**
@@ -301,18 +273,13 @@ public class ControlDeStockFrame extends JFrame {
             return;
         }
 
-        var producto = new HashMap<String, String>();//almacena la información en un hashmap
-        producto.put("NOMBRE", textoNombre.getText());
-        producto.put("DESCRIPCION", textoDescripcion.getText());
-        producto.put("CANTIDAD", String.valueOf(cantidadInt));
+        var producto = new Producto(textoNombre.getText(),
+                textoDescripcion.getText(),
+                cantidadInt);//almacena la información en un hashmap
+
         var categoria = comboCategoria.getSelectedItem();
 
-        try {
-            this.productoController.guardar(producto);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);//encapsulamos la excepcion
-        }
+        this.productoController.guardar(producto);
 
         JOptionPane.showMessageDialog(this, "Registrado con éxito!");
 
