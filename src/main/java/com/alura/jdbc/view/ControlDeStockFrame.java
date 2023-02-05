@@ -21,9 +21,6 @@ import com.alura.jdbc.modelo.Producto;
 import java.sql.SQLException;
 
 import java.util.Optional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class ControlDeStockFrame extends JFrame {
 
@@ -259,25 +256,14 @@ public class ControlDeStockFrame extends JFrame {
      * dentro del panel de visualización
      */
     private void cargarTabla() {
-        List<Map<String, String>> productos = new ArrayList<Map<String, String>>(); //Lista que almacenará lo almacenado en la DB
+        var productos = this.productoController.listar();
 
-        try {
-            productos = this.productoController.listar();
-            try {
-                productos.forEach(producto -> modelo.addRow(//recorremos la lista obteniendo cada campo
-                        new Object[]{
-                                producto.get("IDPRODUCTO"),
-                                producto.get("NOMBRE"),
-                                producto.get("DESCRIPCION"),
-                                producto.get("CANTIDAD")}));
-            } catch (Exception e) {
-                throw e;
-            }
-        } catch (SQLException e) {//manejamos el problema de conexión que surja
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-
+        productos.forEach(producto -> modelo.addRow(//recorremos la lista obteniendo cada campo
+                new Object[]{
+                        producto.getId(),
+                        producto.getNombre(),
+                        producto.getDescripcion(),
+                        producto.getCantidad()}));
     }
 
     /**
@@ -307,12 +293,7 @@ public class ControlDeStockFrame extends JFrame {
 
         var categoria = comboCategoria.getSelectedItem();
 
-        try {
-            this.productoController.guardar(producto);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);//encapsulamos la excepcion
-        }
+        this.productoController.guardar(producto);
 
         JOptionPane.showMessageDialog(this, "Registrado con éxito!");
 

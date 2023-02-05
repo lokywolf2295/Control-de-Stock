@@ -5,7 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.alura.factory.ConnectionFactory;
 import com.alura.jdbc.modelo.Producto;
 
 public class ProductoDAO {
@@ -16,27 +19,24 @@ public class ProductoDAO {
         this.con = con;
     }
 
-    public void guardar(Producto producto) throws SQLException {
+    public void guardar(Producto producto) {
         try (con) { //cerramos la conexión de manera automática
-            con.setAutoCommit(false); //configuramos para que la transacción no tenga el control de la transacción
-            //si surge un error la transacción no se ejecuta directamente, antes ejecutaba una y las siguientes no
-
         /*ATENCIÓN IMPORTANTE
             usamos el PreparedStatement para:
             Revisar la información ingresada por los inputs
             evitar que en esa información se encuentren secuencias de SQL
             por lo tanto evitamos SQL INJECTION
          */
-            final PreparedStatement statement = con.prepareStatement("INSERT INTO PRODUCTO (nombre, descripcion, cantidad)" //valores que queremos agregar
-                    + " VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);//podemos tomar el id generado al insertar en la lista de la DB
+            final PreparedStatement statement = con.prepareStatement("INSERT INTO PRODUCTO " +
+                            "(nombre, descripcion, cantidad)" //valores que queremos agregar
+                            + " VALUES (?,?,?)",
+                    Statement.RETURN_GENERATED_KEYS);//podemos tomar el id generado al insertar en la lista de la DB
 
             try (statement) {//para tener un mejor control de la transacción cerramos el statement de manera automática
                 ejecutaRegistro(producto, statement); //mientras sea menor se registra con normalidad sinó se divide en otra ejecución.
-
-                con.commit(); //de esta manera nosotros decidimos cuando insertaremos la información
             }
-        } catch (Exception e) {
-            con.rollback(); //si ocurre un error entonces la transacción se retrae al inicio.
+        } catch (SQLException e) {
+            throw new RuntimeException();
         }
     }
 
@@ -52,12 +52,6 @@ public class ProductoDAO {
         statement.setString(2, producto.getDescripcion());
         statement.setInt(3, producto.getCantidad());
 
-        /*
-        if (cantidad < 50) { //probando un error para luego manejarlo
-            throw new RuntimeException("Ocurrió un error");
-        }
-        */
-
         statement.execute();
 
         final ResultSet resultSet = statement.getGeneratedKeys();//obtenemos todas las keys (id) generadas
@@ -70,4 +64,37 @@ public class ProductoDAO {
         }
     }
 
+    public List<Producto> listar() {
+        List<Producto> resultado = new ArrayList<>();//en esta lista almacenamos la informacipon obtenida
+
+        ConnectionFactory factory = new ConnectionFactory();
+        final Connection con = factory.recuperaConexion();
+
+        try (con) {
+            final PreparedStatement statement = con
+                    .prepareStatement("SELECT IDPRODUCTO, NOMBRE, DESCRIPCION, CANTIDAD FROM PRODUCTO");
+            //para poder ejecutar comandos de sql  y evitar el ingreso de SQL Injection creamos un PreparedStatement
+
+            try (statement) {
+                statement.execute(); //enviamos las columnas que deseamos visualizar
+
+                final ResultSet resultSet = statement.getResultSet(); //obtenemos la información que proviene de la Base de datos
+
+                try (resultSet) {
+                    while (resultSet.next()) { //mediante el bucle mapeamos la información y la vamos almacenando en cada fila
+                        Producto fila = (new Producto(
+                                resultSet.getInt("IDPRODUCTO"),
+                                resultSet.getString("NOMBRE"),
+                                resultSet.getString("DESCRIPCION"),
+                                resultSet.getInt("CANTIDAD")));
+
+                        resultado.add(fila);
+                    }
+                }
+            }
+            return resultado;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

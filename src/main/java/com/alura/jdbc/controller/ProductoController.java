@@ -5,12 +5,17 @@ import com.alura.jdbc.dao.ProductoDAO;
 import com.alura.jdbc.modelo.Producto;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ProductoController {
+
+    private ProductoDAO productoDAO; //creamos una variable de tipo ProductoDAO
+
+    public ProductoController() {
+        this.productoDAO = new ProductoDAO(new ConnectionFactory().recuperaConexion());//creamos un objeto de la clase ProductoDAO
+        // pasandole como parametro el metodo recuperarConexion de la clase ConnectionFactory
+    }
+
 
     /**
      * Metodo que permite actualizar los datos de la DB con los modificados en
@@ -76,49 +81,19 @@ public class ProductoController {
      * Metodo que permite mostrar la informacion de la base de datos.
      *
      * @return resultado devuelve la lista de los productos
-     * @throws SQLException para evitar errores
      */
-    public List<Map<String, String>> listar() throws SQLException {
-        ConnectionFactory factory = new ConnectionFactory();
-        final Connection con = factory.recuperaConexion();
-
-        try (con) {
-            final PreparedStatement statement = con.prepareStatement("SELECT IDPRODUCTO, NOMBRE, DESCRIPCION, CANTIDAD FROM PRODUCTO"); //para poder ejecutar comandos de sql  y evitar el ingreso de SQL Injection creamos un PreparedStatement
-
-            try (statement) {
-                statement.execute(); //enviamos las columnas que deseamos visualizar
-
-                ResultSet resultSet = statement.getResultSet(); //obtenemos la información que proviene de la Base de datos
-
-                List<Map<String, String>> resultado = new ArrayList<>();//en esta lista almacenamos la informacipon obtenida
-
-                while (resultSet.next()) { //mediante el bucle mapeamos la información y la vamos almacenando en cada fila
-                    Map<String, String> fila = new HashMap<>();
-                    fila.put("IDPRODUCTO", String.valueOf(resultSet.getInt("IDPRODUCTO")));
-                    fila.put("NOMBRE", resultSet.getString("NOMBRE"));
-                    fila.put("DESCRIPCION", resultSet.getString("DESCRIPCION"));
-                    fila.put("CANTIDAD", String.valueOf(resultSet.getInt("CANTIDAD")));
-
-                    resultado.add(fila);
-                }
-                return resultado;
-            }
-        }
+    public List<Producto> listar(){
+        return productoDAO.listar();
     }
 
     /**
      * Metodo que permite guardar la informacion en la base de datos.
-     *
-     * @throws SQLException para evitar errores
+     * @param producto recibe por parametro un objeto de la clase Producto
      */
-    public void guardar(Producto producto) throws SQLException {
-
-        //creamos un objeto de la clase ProductoDAO pasandole como parametro el metodo recuperarConexion de la clase ConnectionFactory
-        ProductoDAO productoDAO = new ProductoDAO(new ConnectionFactory().recuperaConexion());
+    public void guardar(Producto producto) {
 
         productoDAO.guardar(producto);
     }
-
 
 
 }
