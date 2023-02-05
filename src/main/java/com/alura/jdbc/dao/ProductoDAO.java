@@ -19,6 +19,11 @@ public class ProductoDAO {
         this.con = con;
     }
 
+    /**
+     * Metodo que permite guardar la informacion en la base de datos.
+     *
+     * @param producto recibe por parametro un objeto de la clase Producto
+     */
     public void guardar(Producto producto) {
         try (con) { //cerramos la conexión de manera automática
         /*ATENCIÓN IMPORTANTE
@@ -64,6 +69,11 @@ public class ProductoDAO {
         }
     }
 
+    /**
+     * Metodo que permite mostrar la informacion de la base de datos.
+     *
+     * @return resultado devuelve la fila del producto agregado
+     */
     public List<Producto> listar() {
         List<Producto> resultado = new ArrayList<>();//en esta lista almacenamos la informacipon obtenida
 
@@ -93,6 +103,68 @@ public class ProductoDAO {
                 }
             }
             return resultado;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Metodo que permite eliminar los datos de la base de datos
+     *
+     * @param id identificador
+     * @return updateCount devuelve la actualización
+     */
+    public int eliminar(Integer id) {
+        try {
+            final PreparedStatement statement = con.prepareStatement(
+                    "DELETE FROM PRODUCTO WHERE IDPRODUCTO = ?");//script para eliminar un dato por su id
+
+            try (statement) {
+                statement.setInt(1, id);
+
+                statement.execute();
+
+                int updateCount = statement.getUpdateCount();//metodo que retorna el estado de actualización del statement
+
+                return updateCount;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Metodo que permite actualizar los datos de la DB con los modificados en
+     * la tabla.
+     *
+     * @param nombre      del producto
+     * @param descripcion del producto
+     * @param cantidad    de stock
+     * @param id          identificador
+     * @return updateCount devuelve la actualización
+     */
+    public int modificar(String nombre, String descripcion, Integer cantidad, Integer id) {
+
+        try { //cerramos automaticamente la conexion cuando finalice la operación
+            final PreparedStatement statement = con.prepareStatement(
+                    "UPDATE PRODUCTO SET "
+                            + " NOMBRE = ?"
+                            + ", DESCRIPCION = ?"
+                            + ", CANTIDAD = ?"
+                            + " WHERE IDPRODUCTO = ?");//actualizamos todos los datos de la tabla
+
+            try (statement) { //cerramos el statement cuando finalice la instrucción.
+                statement.setString(1, nombre);
+                statement.setString(2, descripcion);
+                statement.setInt(3, cantidad);
+                statement.setInt(4, id);
+
+                statement.execute();
+
+                int updateCount = statement.getUpdateCount();
+
+                return updateCount;//metodo que retorna el estado de actualización del statement
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

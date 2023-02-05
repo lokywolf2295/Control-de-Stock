@@ -211,14 +211,7 @@ public class ControlDeStockFrame extends JFrame {
                     String descripcion = (String) modelo.getValueAt(tabla.getSelectedRow(), 2);
                     Integer cantidad = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 3).toString()); //agregamos el que obtiene la información de la cantidad
 
-                    int filasModificadas;
-
-                    try {
-                        filasModificadas = this.productoController.modificar(nombre, descripcion, cantidad, id);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
-                    }
+                    var filasModificadas = this.productoController.modificar(nombre, descripcion, cantidad, id);
 
                     JOptionPane.showMessageDialog(this, String.format("%d item modificado con éxito!", filasModificadas));
                 }, () -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
@@ -236,14 +229,7 @@ public class ControlDeStockFrame extends JFrame {
         Optional.ofNullable(modelo.getValueAt(tabla.getSelectedRow(), tabla.getSelectedColumn()))
                 .ifPresentOrElse(fila -> {
                     Integer id = Integer.valueOf(modelo.getValueAt(tabla.getSelectedRow(), 0).toString());
-                    int filasModificadas;
-
-                    try {
-                        filasModificadas = this.productoController.eliminar(id);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
-                    }
+                    var filasModificadas = this.productoController.eliminar(id);
 
                     modelo.removeRow(tabla.getSelectedRow());
 
