@@ -25,8 +25,12 @@ public class CategoriaController {
 		return categoriaDAO.listar();
 	}
 
+    /**
+     * Metodo que permite cargar el reporte de los productos ordenados por su categoría
+     * @return la información obtenida del metodo listarConProductos
+     */
     public List<Categoria> cargaReporte() {
-        return this.listar();
+        return this.categoriaDAO.listarConProductos();
     }
 
 }
