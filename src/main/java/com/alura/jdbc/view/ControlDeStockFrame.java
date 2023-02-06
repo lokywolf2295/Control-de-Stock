@@ -275,9 +275,9 @@ public class ControlDeStockFrame extends JFrame {
                 textoDescripcion.getText(),
                 cantidadInt);//almacena la información en un hashmap
 
-        var categoria = comboCategoria.getSelectedItem();
+        var categoria = (Categoria) comboCategoria.getSelectedItem(); //casteo la categoria para que sea de tipo Categoría
 
-        this.productoController.guardar(producto);
+        this.productoController.guardar(producto, categoria.getId());
 
         JOptionPane.showMessageDialog(this, "Registrado con éxito!");
 

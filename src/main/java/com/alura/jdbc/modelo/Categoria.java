@@ -14,6 +14,10 @@ public class Categoria {
         this.nombre = nombre;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
     /**
      * sobreescribimos el metodo
      * @return para que retorne solo el nombre

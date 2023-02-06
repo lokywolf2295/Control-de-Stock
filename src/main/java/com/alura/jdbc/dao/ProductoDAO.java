@@ -33,8 +33,8 @@ public class ProductoDAO {
             por lo tanto evitamos SQL INJECTION
          */
             final PreparedStatement statement = con.prepareStatement("INSERT INTO PRODUCTO " +
-                            "(nombre, descripcion, cantidad)" //valores que queremos agregar
-                            + " VALUES (?,?,?)",
+                            "(nombre, descripcion, cantidad, categoria_id)" //valores que queremos agregar
+                            + " VALUES (?,?,?,?)",
                     Statement.RETURN_GENERATED_KEYS);//podemos tomar el id generado al insertar en la lista de la DB
 
             try (statement) {//para tener un mejor control de la transacción cerramos el statement de manera automática
@@ -48,7 +48,7 @@ public class ProductoDAO {
     /**
      * metodo que ejecutala instrucción SQL
      *
-     * @param producto  contiene el modelo de nombre, descripción y cantidad
+     * @param producto  contiene el modelo de nombre, descripción, cantidad y categoriaId
      * @param statement prepara la ejecución de la query
      * @throws SQLException para evitar errores
      */
@@ -56,6 +56,8 @@ public class ProductoDAO {
         statement.setString(1, producto.getNombre());
         statement.setString(2, producto.getDescripcion());
         statement.setInt(3, producto.getCantidad());
+        statement.setInt(4, producto.getCategoriaId());//agregamos la categoria
+
 
         statement.execute();
 
