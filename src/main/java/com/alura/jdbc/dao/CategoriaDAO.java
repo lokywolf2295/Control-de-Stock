@@ -1,6 +1,7 @@
 package com.alura.jdbc.dao;
 
 import com.alura.jdbc.modelo.Categoria;
+import com.alura.jdbc.modelo.Producto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,8 +27,9 @@ public class CategoriaDAO {
         List<Categoria> resultado = new ArrayList<>();
 
         try {
-            final PreparedStatement statement = con.prepareStatement(
-                    "SELECT ID, NOMBRE FROM CATEGORIA");//script para mostrar los nombres de las categorias
+            var querySelect = "SELECT ID, NOMBRE FROM CATEGORIA";
+            System.out.println(querySelect);
+            final PreparedStatement statement = con.prepareStatement(querySelect);//script para mostrar los nombres de las categorias
 
             try (statement) {
                 final ResultSet resultSet = statement.executeQuery();
@@ -51,9 +53,10 @@ public class CategoriaDAO {
         List<Categoria> resultado = new ArrayList<>();
 
         try {
-            var querySelect = "SELECT C.ID, C.NOMBRE, P.ID, P.NOMBRE, P.CANTIDAD "
+            var querySelect = "SELECT C.ID, C.NOMBRE, P.IDPRODUCTO, P.NOMBRE, P.CANTIDAD "
                     + "FROM CATEGORIA C "
                     + "INNER JOIN PRODUCTO P ON C.ID = P.CATEGORIA_ID";
+            System.out.println(querySelect);
             final PreparedStatement statement = con.prepareStatement(querySelect);
             //script para mostrar los nombres de las categorias junto con sus productos
 
@@ -63,10 +66,10 @@ public class CategoriaDAO {
                 try (resultSet) {
                     while (resultSet.next()) { //ciclo que agrega a la lista de categorias su nombre segun su id
                         //Extraigo los id y nombre en variable para usar el stream
-                        Integer categoriaId = resultSet.getInt("ID");
-                        String categoriaNombre = resultSet.getString("NOMBRE");
+                        Integer categoriaId = resultSet.getInt("C.ID");
+                        String categoriaNombre = resultSet.getString("C.NOMBRE");
 
-                        var categoria = resultado
+                        Categoria categoria = resultado
                                 .stream() //transformo en stream la lista
                                 .filter(cat -> cat.getId().equals(categoriaId)) //nusco si en la lista hay una categoría con el id
                                 .findAny().orElseGet(() -> { //si existe agregamos el resultado a la variable categoria
@@ -77,6 +80,11 @@ public class CategoriaDAO {
                                     resultado.add(cat); //agregamos a la categoría
                                     return cat; //y la retornamos
                                 });
+                        Producto producto = new Producto(resultSet.getInt("P.IDPRODUCTO"),
+                                resultSet.getString("P.NOMBRE"),
+                                resultSet.getInt("P.CANTIDAD"));
+
+                        categoria.agregar(producto);
                     }
                 }
             }
