@@ -111,6 +111,48 @@ public class ProductoDAO {
     }
 
     /**
+     * Metodo Sobreescrito que permite mostrar la lista de productos segun su categoría.
+     * @param categoriaId para poder buscar por categoría
+     * @return resultado que es la lista
+     */
+    public List<Producto> listar(Integer categoriaId) {
+        List<Producto> resultado = new ArrayList<>();//en esta lista almacenamos la informacipon obtenida
+
+        ConnectionFactory factory = new ConnectionFactory();
+        final Connection con = factory.recuperaConexion();
+
+        try (con) {
+            final PreparedStatement statement = con
+                    .prepareStatement("SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD "
+                            +" FROM PRODUCTO"
+                            +"WHERE CATEGORIAID = ?"); //conocido como Queries N + 1 (hace una solicitud de conexción por cada categoría a buscar) XXX no es buena práctica
+            //para poder ejecutar comandos de sql  y evitar el ingreso de SQL Injection creamos un PreparedStatement
+
+            try (statement) {
+                statement.setInt(1,categoriaId);
+                statement.execute(); //enviamos las columnas que deseamos visualizar
+
+                final ResultSet resultSet = statement.getResultSet(); //obtenemos la información que proviene de la Base de datos
+
+                try (resultSet) {
+                    while (resultSet.next()) { //mediante el bucle mapeamos la información y la vamos almacenando en cada fila
+                        Producto fila = (new Producto(
+                                resultSet.getInt("IDPRODUCTO"),
+                                resultSet.getString("NOMBRE"),
+                                resultSet.getString("DESCRIPCION"),
+                                resultSet.getInt("CANTIDAD")));
+
+                        resultado.add(fila);
+                    }
+                }
+            }
+            return resultado;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Metodo que permite eliminar los datos de la base de datos
      *
      * @param id identificador
