@@ -33,8 +33,8 @@ public class ProductoDAO {
             por lo tanto evitamos SQL INJECTION
          */
             final PreparedStatement statement = con.prepareStatement("INSERT INTO PRODUCTO " +
-                            "(nombre, descripcion, cantidad)" //valores que queremos agregar
-                            + " VALUES (?,?,?)",
+                            "(nombre, descripcion, cantidad, categoria_id)" //valores que queremos agregar
+                            + " VALUES (?,?,?,?)",
                     Statement.RETURN_GENERATED_KEYS);//podemos tomar el id generado al insertar en la lista de la DB
 
             try (statement) {//para tener un mejor control de la transacción cerramos el statement de manera automática
@@ -48,7 +48,7 @@ public class ProductoDAO {
     /**
      * metodo que ejecutala instrucción SQL
      *
-     * @param producto  contiene el modelo de nombre, descripción y cantidad
+     * @param producto  contiene el modelo de nombre, descripción, cantidad y categoriaId
      * @param statement prepara la ejecución de la query
      * @throws SQLException para evitar errores
      */
@@ -56,6 +56,8 @@ public class ProductoDAO {
         statement.setString(1, producto.getNombre());
         statement.setString(2, producto.getDescripcion());
         statement.setInt(3, producto.getCantidad());
+        statement.setInt(4, producto.getCategoriaId());//agregamos la categoria
+
 
         statement.execute();
 
@@ -86,6 +88,48 @@ public class ProductoDAO {
             //para poder ejecutar comandos de sql  y evitar el ingreso de SQL Injection creamos un PreparedStatement
 
             try (statement) {
+                statement.execute(); //enviamos las columnas que deseamos visualizar
+
+                final ResultSet resultSet = statement.getResultSet(); //obtenemos la información que proviene de la Base de datos
+
+                try (resultSet) {
+                    while (resultSet.next()) { //mediante el bucle mapeamos la información y la vamos almacenando en cada fila
+                        Producto fila = (new Producto(
+                                resultSet.getInt("IDPRODUCTO"),
+                                resultSet.getString("NOMBRE"),
+                                resultSet.getString("DESCRIPCION"),
+                                resultSet.getInt("CANTIDAD")));
+
+                        resultado.add(fila);
+                    }
+                }
+            }
+            return resultado;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Metodo Sobreescrito que permite mostrar la lista de productos segun su categoría.
+     * @param categoriaId para poder buscar por categoría
+     * @return resultado que es la lista
+     */
+    public List<Producto> listar(Integer categoriaId) {
+        List<Producto> resultado = new ArrayList<>();//en esta lista almacenamos la informacipon obtenida
+
+        ConnectionFactory factory = new ConnectionFactory();
+        final Connection con = factory.recuperaConexion();
+
+        try (con) {
+            final PreparedStatement statement = con
+                    .prepareStatement("SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD "
+                            +" FROM PRODUCTO"
+                            +"WHERE CATEGORIAID = ?"); //conocido como Queries N + 1 (hace una solicitud de conexción por cada categoría a buscar) XXX no es buena práctica
+            //para poder ejecutar comandos de sql  y evitar el ingreso de SQL Injection creamos un PreparedStatement
+
+            try (statement) {
+                statement.setInt(1,categoriaId);
                 statement.execute(); //enviamos las columnas que deseamos visualizar
 
                 final ResultSet resultSet = statement.getResultSet(); //obtenemos la información que proviene de la Base de datos

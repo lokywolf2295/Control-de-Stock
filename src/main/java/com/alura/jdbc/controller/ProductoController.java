@@ -2,6 +2,7 @@ package com.alura.jdbc.controller;
 
 import com.alura.factory.ConnectionFactory;
 import com.alura.jdbc.dao.ProductoDAO;
+import com.alura.jdbc.modelo.Categoria;
 import com.alura.jdbc.modelo.Producto;
 
 import java.util.List;
@@ -40,7 +41,7 @@ public class ProductoController {
     }
 
     /**
-     * Metodo que al metodo listar y permite mostrar todos los productos.
+     * Metodo que llama al metodo listar y permite mostrar todos los productos.
      *
      * @return resultado devuelve la lista de los productos
      */
@@ -49,12 +50,22 @@ public class ProductoController {
     }
 
     /**
+     * Metodo Sobrecargado que llama al metodo listar y permite mostrar todos los productos.
+     * @param categoria recibiendo como parametro
+     * @return productoDAO
+     */
+    public List<Producto> listar(Categoria categoria) {
+        return productoDAO.listar(categoria.getId());
+    }
+
+    /**
      * Metodo que permite llamar al metodo guardar de la clase productoDAO.
      *
      * @param producto recibe por parametro un objeto de la clase Producto
+     * @param categoriaId recibe el id para relacionarlo con la categoría
      */
-    public void guardar(Producto producto) {
-
+    public void guardar(Producto producto, Integer categoriaId) {
+        producto.setCategoriaId(categoriaId);
         productoDAO.guardar(producto);
     }
 
