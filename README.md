@@ -13,31 +13,21 @@ El programa permite Crear, Leer, Editar y Eliminar los productos, es decir que s
 
 Además te permite agrupar los productos por diferentes categorías y mostrar un reporte separando por cada categoría.
 
-<!--
-![Agregamos Tareas](https://i.postimg.cc/bvgYF1vZ/Manejo-DOM-1.png)
 
 #
 
-Vista de como queda luego de Borrar la taréa
+<h3>Vista General de la App de Control de Stock</h3>
 
-![Eliminar Tarea](https://i.postimg.cc/zBWNYWzw/Manejo-DOM-2.png)
-
-#
-
-Vista de como quedan las tareas ordenadas por Fecha
-
-![Ordenamiento por Fechas](https://i.postimg.cc/qM7S5SPd/Agregando-reconocimientos-de-Check-Box-1.png)
+![Vista General](https://i.postimg.cc/Wb5cFGNP/Vista-General-de-la-App.png)
 
 #
 
-Vista del almacenamiento de la información en el LocalStorage
+<h3>Vista de Reportes ordenados por Categoría</h3>
 
-![Almacenamiento en LocalStorage](https://i.postimg.cc/sXrDPs0z/Agregando-reconocimientos-de-Check-Box.png)
+![Ordenamiento por Fechas](https://i.postimg.cc/mkVJ94GS/Vista-de-Reportes-por-Categorias.png)
 
 #
 
-Vista de como quedan las tareas ordenadas por Fecha y Hora
+<h3>Tabla de Productos vista desde la Base de Datos</h3>
 
-![Ordenamiento por Hora](https://i.postimg.cc/W4PPCSm6/Trabajando-con-Ordenamiento-por-Horarios.png)
-
--->
+![Tabla Productos DB](https://i.postimg.cc/ZKtCshpq/Vista-de-la-Tabla-de-Productos-DB.png)
